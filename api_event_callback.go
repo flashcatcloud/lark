@@ -319,5 +319,26 @@ func decryptEncryptString(encryptKey string, cryptoText string) (string, error) 
 	stream := cipher.NewCBCDecrypter(block, iv)
 	stream.CryptBlocks(ciphertext, ciphertext)
 
-	return string(ciphertext[:len(ciphertext)-int(ciphertext[len(ciphertext)-1])]), nil
+	// 安全地移除 PKCS7 填充
+	if len(ciphertext) == 0 {
+		return "", errors.New("invalid ciphertext: empty after decryption")
+	}
+
+	// 获取填充长度
+	paddingLength := int(ciphertext[len(ciphertext)-1])
+
+	// 额外的安全检查
+	if paddingLength > len(ciphertext) || paddingLength == 0 {
+		return "", errors.New("invalid padding")
+	}
+
+	// 验证填充是否正确
+	for i := 1; i <= paddingLength; i++ {
+		if ciphertext[len(ciphertext)-i] != byte(paddingLength) {
+			return "", errors.New("invalid PKCS7 padding")
+		}
+	}
+
+	// 移除填充并返回
+	return string(ciphertext[:len(ciphertext)-paddingLength]), nil
 }
