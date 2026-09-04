@@ -62,3 +62,19 @@ func TestSendEphemeralMessageReqRejectsBothCardVersions(t *testing.T) {
 	_, err := json.Marshal(req)
 	require.ErrorContains(t, err, "Card and CardV2 cannot both be set")
 }
+
+func TestSendEphemeralMessageReqOmitsEmptyCard(t *testing.T) {
+	req := &SendEphemeralMessageReq{
+		ChatID:  "oc_test",
+		OpenID:  "ou_test",
+		MsgType: MsgTypeInteractive,
+	}
+
+	body, err := json.Marshal(req)
+	require.NoError(t, err)
+	require.JSONEq(t, `{
+		"chat_id":"oc_test",
+		"open_id":"ou_test",
+		"msg_type":"interactive"
+	}`, string(body))
+}
