@@ -13,7 +13,7 @@ func TestSendEphemeralMessageReqMarshalsV2Card(t *testing.T) {
 		ChatID:  "oc_test",
 		OpenID:  "ou_test",
 		MsgType: MsgTypeInteractive,
-		Card:    card,
+		CardV2:  card,
 	}
 
 	body, err := json.Marshal(req)
@@ -27,18 +27,21 @@ func TestSendEphemeralMessageReqMarshalsV2Card(t *testing.T) {
 }
 
 func TestSendEphemeralMessageReqKeepsV1CardCompatibility(t *testing.T) {
+	card := &MessageContentCard{
+		Modules: []MessageContentCardModule{
+			MessageContentCardModuleDIV{
+				Text: &MessageContentCardObjectText{Tag: "lark_md", Content: "hello"},
+			},
+		},
+	}
 	req := &SendEphemeralMessageReq{
 		ChatID:  "oc_test",
 		OpenID:  "ou_test",
 		MsgType: MsgTypeInteractive,
-		Card: &MessageContentCard{
-			Modules: []MessageContentCardModule{
-				MessageContentCardModuleDIV{
-					Text: &MessageContentCardObjectText{Tag: "lark_md", Content: "hello"},
-				},
-			},
-		},
+		Card:    card,
 	}
+	var typedCard *MessageContentCard = req.Card
+	require.Same(t, card, typedCard)
 
 	body, err := json.Marshal(req)
 	require.NoError(t, err)
@@ -48,4 +51,14 @@ func TestSendEphemeralMessageReqKeepsV1CardCompatibility(t *testing.T) {
 		"msg_type":"interactive",
 		"card":{"elements":[{"tag":"div","text":{"tag":"lark_md","content":"hello"}}]}
 	}`, string(body))
+}
+
+func TestSendEphemeralMessageReqRejectsBothCardVersions(t *testing.T) {
+	req := &SendEphemeralMessageReq{
+		Card:   &MessageContentCard{},
+		CardV2: json.RawMessage(`{"schema":"2.0","body":{"elements":[]}}`),
+	}
+
+	_, err := json.Marshal(req)
+	require.ErrorContains(t, err, "Card and CardV2 cannot both be set")
 }
