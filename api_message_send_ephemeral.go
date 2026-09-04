@@ -69,12 +69,12 @@ func (r *Mock) UnMockMessageSendEphemeralMessage() {
 
 // SendEphemeralMessageReq ...
 type SendEphemeralMessageReq struct {
-	ChatID  string              `json:"chat_id,omitempty"`  // 发送临时消息的群ID可通过事件推送获取
-	OpenID  string              `json:"open_id,omitempty"`  // 指定发送临时消息卡片的用户, 其他人将无法看到临时消息卡片；只需要填 open_id、email、user_id中的一个即可, 推荐使用 OpenID, 获取方式可参考文档[如何获取 Open ID？](https://open.feishu.cn/document/uAjLw4CM/ugTN1YjL4UTN24CO1UjN/trouble-shooting/how-to-obtain-openid) （服务端依次读取字段的顺序为 open_id > user_id > email）
-	UserID  string              `json:"user_id,omitempty"`  // 指定发送临时消息卡片的用户, 其他人将无法看到临时消息卡片；只需要填 open_id、email、user_id中的一个即可, 推荐使用 OpenID, 获取方式可参考文档[如何获取 Open ID？](https://open.feishu.cn/document/uAjLw4CM/ugTN1YjL4UTN24CO1UjN/trouble-shooting/how-to-obtain-openid) （服务端依次读取字段的顺序为 open_id > user_id > email）
-	Email   string              `json:"email,omitempty"`    // 指定发送临时消息卡片的用户, 其他人将无法看到临时消息卡片；只需要填 open_id、email、user_id中的一个即可, 推荐使用 OpenID, 获取方式可参考文档[如何获取 Open ID？](https://open.feishu.cn/document/uAjLw4CM/ugTN1YjL4UTN24CO1UjN/trouble-shooting/how-to-obtain-openid) （服务端依次读取字段的顺序为 open_id > user_id > email）
-	MsgType MsgType             `json:"msg_type,omitempty"` // 消息的类型, 此处固定填 "interactive"
-	Card    *MessageContentCard `json:"card,omitempty"`     // 消息卡片的描述内容, 具体参考 [基础结构](https://open.feishu.cn/document/ukTMukTMukTM/uEjNwUjLxYDM14SM2ATN)
+	ChatID  string  `json:"chat_id,omitempty"`  // 发送临时消息的群ID可通过事件推送获取
+	OpenID  string  `json:"open_id,omitempty"`  // 指定发送临时消息卡片的用户, 其他人将无法看到临时消息卡片；只需要填 open_id、email、user_id中的一个即可, 推荐使用 OpenID, 获取方式可参考文档[如何获取 Open ID？](https://open.feishu.cn/document/uAjLw4CM/ugTN1YjL4UTN24CO1UjN/trouble-shooting/how-to-obtain-openid) （服务端依次读取字段的顺序为 open_id > user_id > email）
+	UserID  string  `json:"user_id,omitempty"`  // 指定发送临时消息卡片的用户, 其他人将无法看到临时消息卡片；只需要填 open_id、email、user_id中的一个即可, 推荐使用 OpenID, 获取方式可参考文档[如何获取 Open ID？](https://open.feishu.cn/document/uAjLw4CM/ugTN1YjL4UTN24CO1UjN/trouble-shooting/how-to-obtain-openid) （服务端依次读取字段的顺序为 open_id > user_id > email）
+	Email   string  `json:"email,omitempty"`    // 指定发送临时消息卡片的用户, 其他人将无法看到临时消息卡片；只需要填 open_id、email、user_id中的一个即可, 推荐使用 OpenID, 获取方式可参考文档[如何获取 Open ID？](https://open.feishu.cn/document/uAjLw4CM/ugTN1YjL4UTN24CO1UjN/trouble-shooting/how-to-obtain-openid) （服务端依次读取字段的顺序为 open_id > user_id > email）
+	MsgType MsgType `json:"msg_type,omitempty"` // 消息的类型, 此处固定填 "interactive"
+	Card    any     `json:"card,omitempty"`     // 消息卡片内容，支持 JSON 1.0 和 JSON 2.0
 }
 
 // SendEphemeralMessageResp ...
