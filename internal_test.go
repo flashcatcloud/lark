@@ -42,8 +42,9 @@ func Test_Request(t *testing.T) {
 		}
 
 		resp, err := ins.parseRawHttpRequest(ctx, &RawRequestReq{
-			Method: "get",
-			URL:    "http://x.com/:id",
+			MethodOption: newMethodOption(nil),
+			Method:       "get",
+			URL:          "http://x.com/:id",
 			Body: req{
 				ID: string("1234"),
 			},
@@ -60,8 +61,9 @@ func Test_Request(t *testing.T) {
 			ID int `path:"id"`
 		}
 		resp, err := ins.parseRawHttpRequest(ctx, &RawRequestReq{
-			Method: "get",
-			URL:    "http://x.com/:id",
+			MethodOption: newMethodOption(nil),
+			Method:       "get",
+			URL:          "http://x.com/:id",
 			Body: req{
 				ID: 1234,
 			},
@@ -79,8 +81,9 @@ func Test_Request(t *testing.T) {
 			ID   int    `path:"id"`
 		}
 		resp, err := ins.parseRawHttpRequest(ctx, &RawRequestReq{
-			Method: "get",
-			URL:    "http://x.com/:type/:id",
+			MethodOption: newMethodOption(nil),
+			Method:       "get",
+			URL:          "http://x.com/:type/:id",
 			Body: req{
 				Type: "x",
 				ID:   1234,
@@ -99,8 +102,9 @@ func Test_Request(t *testing.T) {
 			ID   int    `path:"id"`
 		}
 		resp, err := ins.parseRawHttpRequest(ctx, &RawRequestReq{
-			Method: "get",
-			URL:    "http://x.com/:id",
+			MethodOption: newMethodOption(nil),
+			Method:       "get",
+			URL:          "http://x.com/:id",
 			Body: req{
 				Type: "x",
 				ID:   1234,
@@ -120,8 +124,9 @@ func Test_Request(t *testing.T) {
 			Name string `json:"name"`
 		}
 		resp, err := ins.parseRawHttpRequest(ctx, &RawRequestReq{
-			Method: "get",
-			URL:    "http://x.com/:id",
+			MethodOption: newMethodOption(nil),
+			Method:       "get",
+			URL:          "http://x.com/:id",
 			Body: req{
 				Type: "x",
 				ID:   1234,
@@ -144,9 +149,10 @@ func Test_Request(t *testing.T) {
 			Image     io.Reader `json:"image,omitempty"`      // 图片内容,**示例值**：二进流
 		}
 		resp, err := ins.parseRawHttpRequest(ctx, &RawRequestReq{
-			Method: "get",
-			URL:    "http://x.com",
-			IsFile: true,
+			MethodOption: newMethodOption(nil),
+			Method:       "get",
+			URL:          "http://x.com",
+			IsFile:       true,
 			Body: req{
 				ImageType: ImageTypeMessage,
 				Image:     bytes.NewReader([]byte("hi")),
@@ -167,9 +173,10 @@ func Test_Request(t *testing.T) {
 			Types []string `query:"types"`
 		}
 		resp, err := ins.parseRawHttpRequest(ctx, &RawRequestReq{
-			Method: "get",
-			URL:    "http://x.com",
-			IsFile: true,
+			MethodOption: newMethodOption(nil),
+			Method:       "get",
+			URL:          "http://x.com",
+			IsFile:       true,
 			Body: req{
 				Types: []string{"a", "b"},
 			},
