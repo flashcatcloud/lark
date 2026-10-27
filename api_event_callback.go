@@ -96,34 +96,36 @@ const eventTypeURLVerification = "url_verification"
 func (r *EventCallbackService) listenAllCallback(ctx context.Context, isSecurity bool, header http.Header, reader io.Reader, writer http.ResponseWriter) {
 	bs, err := ioutil.ReadAll(reader)
 	if err != nil {
-		writer.WriteHeader(500)
-		_, _ = writer.Write([]byte(fmt.Sprintf(`{"err":%q}`, err)))
+		writeCallbackError(writer, http.StatusBadRequest, err)
 		return
 	}
 
 	req, err := r.parserAllCallbackRequest(ctx, header, bs)
 	if err != nil {
-		writer.WriteHeader(500)
-		_, _ = writer.Write([]byte(fmt.Sprintf(`{"err":%q}`, err)))
+		writeCallbackError(writer, http.StatusBadRequest, err)
 		return
 	}
 
 	// 只有类型不是 url_verification 且 设置了校验的情况下，才发起校验
 	if err := r.checkCallbackSecurity(isSecurity, header, bs, req); err != nil {
-		writer.WriteHeader(500)
-		_, _ = writer.Write([]byte(fmt.Sprintf(`{"err":%q}`, err)))
+		writeCallbackError(writer, http.StatusForbidden, err)
 		return
 	}
 
 	s, err := r.handlerAllEvent(ctx, writer, req)
 	if err != nil {
-		writer.WriteHeader(500)
-		_, _ = writer.Write([]byte(fmt.Sprintf(`{"err":%q}`, err)))
+		writeCallbackError(writer, http.StatusInternalServerError, err)
 		return
 	}
 
 	_, _ = writer.Write([]byte(s))
 	return
+}
+
+func writeCallbackError(writer http.ResponseWriter, status int, err error) {
+	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
+	writer.WriteHeader(status)
+	_ = json.NewEncoder(writer).Encode(map[string]string{"err": err.Error()})
 }
 
 func (r *EventCallbackService) parserAllCallbackRequest(ctx context.Context, header http.Header, body []byte) (*eventReq, error) {
@@ -138,7 +140,10 @@ func (r *EventCallbackService) parserAllCallbackRequest(ctx context.Context, hea
 		},
 	}
 	if err := json.Unmarshal(body, &req); err != nil {
-		return nil, fmt.Errorf("lark event unmarshal req %s failed", body)
+		return nil, fmt.Errorf("parse callback request: %w", err)
+	}
+	if req == nil {
+		return nil, errors.New("callback request must be an object")
 	}
 
 	if req.Encrypt != "" {
@@ -316,13 +321,16 @@ func decryptEncryptString(encryptKey string, cryptoText string) (string, error) 
 
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
+	if len(ciphertext) == 0 {
+		return "", errors.New("invalid ciphertext: empty after decryption")
+	}
+	if len(ciphertext)%aes.BlockSize != 0 {
+		return "", fmt.Errorf("ciphertext length %d is not a multiple of the block size", len(ciphertext))
+	}
 	stream := cipher.NewCBCDecrypter(block, iv)
 	stream.CryptBlocks(ciphertext, ciphertext)
 
 	// 安全地移除 PKCS7 填充
-	if len(ciphertext) == 0 {
-		return "", errors.New("invalid ciphertext: empty after decryption")
-	}
 	// 获取填充长度
 	paddingLength := int(ciphertext[len(ciphertext)-1])
 	// 额外的安全检查
